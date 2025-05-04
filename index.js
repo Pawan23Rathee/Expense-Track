@@ -6,12 +6,11 @@ const form = document.getElementById("form");
 const text = document.getElementById("text");
 const amount = document.getElementById("amount");
 
-const localStorageTransations = JSON.parse(localStorage.getItem("transations"));
+const localStorageTransations = JSON.parse(localStorage.getItem("transations")) || [];
 
-let transations =
-  localStorage.getItem("transations") !== null ? localStorageTransations : [];
+let transations = localStorageTransations;  // Start with the existing transactions or empty array
 
-// Generate random ID
+// Generate random ID for transactions
 function generateID() {
   return Math.floor(Math.random() * 100000000);
 }
@@ -53,29 +52,35 @@ function updateValues() {
 
 // Remove a transaction by ID
 function removeTransation(id) {
+  // Filter out the transaction by ID
   transations = transations.filter(transation => transation.id !== id);
+  
+  // Update localStorage with the new transactions array
   updateLocalStorage();
+  
+  // Re-render the transaction list
   init();
 }
 
-// Update local storage
+// Update local storage with the latest transactions
 function updateLocalStorage() {
   localStorage.setItem("transations", JSON.stringify(transations));
 }
 
 // Initialize the app
 function init() {
-  list.innerHTML = "";
-  transations.forEach(addTransationDOM);
-  updateValues();
+  list.innerHTML = "";  // Clear current list before re-rendering
+  transations.forEach(addTransationDOM);  // Re-render each transaction
+  updateValues();  // Update the values of balance, income, and expenses
 }
 
-init();
+init();  // Call init to load transactions on page load
 
-// Add transaction event listener
+// Add transaction event listener for form submission
 form.addEventListener("submit", function (e) {
-  e.preventDefault();
+  e.preventDefault();  // Prevent default form submission
 
+  // Validate inputs
   if (text.value.trim() === "" || amount.value.trim() === "") {
     text.placeholder = "Please add a text";
     text.style.backgroundColor = "#ccc";
@@ -83,16 +88,24 @@ form.addEventListener("submit", function (e) {
     amount.style.backgroundColor = "#ccc";
   } else {
     const transation = {
-      id: generateID(),
+      id: generateID(),  // Generate unique ID
       text: text.value,
-      amount: +amount.value
+      amount: +amount.value  // Convert amount to number
     };
 
+    // Add transaction to array
     transations.push(transation);
+
+    // Add transaction to the DOM
     addTransationDOM(transation);
+
+    // Update values (balance, income, expense)
     updateValues();
+
+    // Update localStorage
     updateLocalStorage();
 
+    // Clear form fields
     text.value = "";
     amount.value = "";
     text.style.backgroundColor = "";
